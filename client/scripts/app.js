@@ -1,7 +1,11 @@
 // YOUR CODE HERE:
+var isRoomSelected = false;
+var room;
+var friends = [];
+
 $(document).ready(function(){
   setInterval(function(){
-  	app.init();
+  	app.init(isRoomSelected);
   },3000);
 
   $("#sendMessage").on("click", function(){
@@ -14,26 +18,39 @@ $(document).ready(function(){
   	$(".room").val(""); 
   });
 
+  $(document).on("click", "a", function(e){  
+  	room = $(this).text().slice(0,-2);
+  	isRoomSelected = true;
+  	app.fetch(room);
+  });
+
 });
 
 var app = {
 
   init:function(){
  	console.log("Initialize");
- 	this.fetch();
+ 	if(!isRoomSelected)
+	  this.fetch();
+	else
+	  this.fetch(room);
   },
 
   send:function(){
 	var location = window.location.href;
 	var username = location.slice(location.indexOf("name=")+5);
 	var text = $(".input").val();
-	var roomname = $(".room").val();
+	var roomname;
+	if(isRoomSelected)
+	  roomname = $(".room").val();
+	else
+	  roomname= '';
 	var message = {
 		'username': username,
 		'text': text,
 		'roomname': roomname
 	};
-	// either show and send at the same time or call fetch after send
+
 	$.ajax({
 	  url: 'https://api.parse.com/1/classes/chatterbox',
 	  type: 'POST',
@@ -48,7 +65,7 @@ var app = {
 	});
   },
 
-  fetch:function(){
+  fetch:function(room){
 	var display = this.display;
 	$.ajax({
 	  url: 'https://api.parse.com/1/classes/chatterbox',
@@ -57,8 +74,7 @@ var app = {
 	  contentType: 'application/json',
 	  success: function (data) {
 	    console.log('chatterbox: Message received');
-	    console.dir(data);
-		display(data);
+		display(data, room);
 	  },
 	  error: function (data) {
 	    console.error('chatterbox: Failed to get message');
@@ -66,27 +82,43 @@ var app = {
 	});
   },
 
-  //create a list of current messages with a unique identifier
-  // when a new msg arrives append that to the old ones
-  display:function(data){
+  display:function(data, room, friends){
 	for(var i = 0; i < 100; i++) {
+	  $('#spanU' + i).remove();
+	  $('#spanT' + i).remove();
 	  $('#li' + i).remove();
 	  $("a").remove();
-	}  	
+	}
+
 	var obj = data['results'];
 	var rooms = {};
-	for(var j = 0; j < obj.length; j++) {
-	  if(obj[j]['username'] && obj[j]['text']) {
-	  	$('#chats').append('<li id=li' + j +'>'+'</li>');
-	  	$('#li' + j).text(obj[j]['username'] + ' : ' + obj[j]['text']);
-	  	if(obj[j]['roomname']) {
-		  	rooms[obj[j]['roomname']] = true;
-		}
-	  }
-    }
-	for(var k in rooms)
-	  $(".chatRooms").append("<a href='#'>"+k+ "/" + " </a>");
 
+	if(!room) {  	
+		for(var j = 0; j < obj.length; j++) {
+		  if(obj[j]['username'] && obj[j]['text']) {
+		  	$('#chats').append('<li id=li'+j+'>'+'<span id=spanU' + j +'>' +'</span>'+ " : " +'<span id=spanT' + j +'>'+ '</span></li>');
+		  	$('#spanU' + j).text(obj[j]['username']);
+		  	$('#spanT' + j).text(obj[j]['text']);
+		  }
+		  if(obj[j]['roomname']) {
+		  	rooms[obj[j]['roomname']] = true;
+		  }
+	    }
+	}
+	else {
+		for(var j = 0; j < obj.length; j++) {
+		  if(obj[j]['username'] && obj[j]['text'] && obj[j]['roomname'] === room) {
+		  	$('#chats').append('<li id=li' + j +'>'+'</li>');
+		  	$('#li' + j).text(obj[j]['username'] + ' : ' + obj[j]['text']);
+		  }
+		  if(obj[j]['roomname']) {
+		  	rooms[obj[j]['roomname']] = true;
+		  }
+	    }
+	}
+
+	for(var k in rooms)
+	  $(".chatRooms").append("<a href='javascript:void(0)' class='roomlist'>"+k+ "/" + " </a>");
   }
 
 };
