@@ -6,7 +6,7 @@ body {
 }
 
 #main {
-    width: 500px;
+    width: 600px;
     margin: auto;
     text-align: left;
     background: white;
@@ -60,6 +60,7 @@ form input[type=text] {
 }
 
 .chat {
+    width:600px;
     padding: 5px;
     margin-bottom: 5px;
     background-color: #eee;
