@@ -1,32 +1,39 @@
 // YOUR CODE HERE:
 $(document).ready(function(){
-  // setInterval(function(){
-  // 	//app.wipe();
-  // 	app.fetch();
-  // },3000);
-  $(".button").on("click", function(){
+  setInterval(function(){
+  	app.init();
+  },3000);
+
+  $("#sendMessage").on("click", function(){
   	app.send();
+  	$(".input").val("");
   });
+
+  $("#addRoom").on("click", function(){
+  	app.send();
+  	$(".room").val(""); 
+  });
+
 });
 
 var app = {
 
   init:function(){
  	console.log("Initialize");
+ 	this.fetch();
   },
 
   send:function(){
 	var location = window.location.href;
 	var username = location.slice(location.indexOf("name=")+5);
 	var text = $(".input").val();
+	var roomname = $(".room").val();
 	var message = {
 		'username': username,
 		'text': text,
-		'roomname': '4chan'
+		'roomname': roomname
 	};
-	// either show and send at the same time
-	// or call fetch after send
-	//console.log(message);
+	// either show and send at the same time or call fetch after send
 	$.ajax({
 	  url: 'https://api.parse.com/1/classes/chatterbox',
 	  type: 'POST',
@@ -36,7 +43,6 @@ var app = {
 	    console.log('chatterbox: Message sent');
 	  },
 	  error: function (data) {
-	    // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
 	    console.error('chatterbox: Failed to send message');
 	  }
 	});
@@ -47,10 +53,11 @@ var app = {
 	$.ajax({
 	  url: 'https://api.parse.com/1/classes/chatterbox',
 	  type: 'GET',
-	  data: {},
+	  data: {order:"-createdAt"},
 	  contentType: 'application/json',
 	  success: function (data) {
-	    console.log('chatterbox: Message received', data);
+	    console.log('chatterbox: Message received');
+	    console.dir(data);
 		display(data);
 	  },
 	  error: function (data) {
@@ -62,16 +69,29 @@ var app = {
   //create a list of current messages with a unique identifier
   // when a new msg arrives append that to the old ones
   display:function(data){
-	//wipe
-	//create a span and put the username there, hence check for xss attacks
-	//
+	for(var i = 0; i < 100; i++) {
+	  $('#li' + i).remove();
+	  $("a").remove();
+	}  	
 	var obj = data['results'];
-	for(var j=0; j<obj.length; j++) {
-		$("#chats").append("<li>" + obj[j]['username'] + " : " + obj[j]['text'] + " Created At: " + obj[j]['createdAt'] + "</li>");
+	var rooms = {};
+	for(var j = 0; j < obj.length; j++) {
+	  if(obj[j]['username'] && obj[j]['text']) {
+	  	$('#chats').append('<li id=li' + j +'>'+'</li>');
+	  	$('#li' + j).text(obj[j]['username'] + ' : ' + obj[j]['text']);
+	  	if(obj[j]['roomname']) {
+		  	rooms[obj[j]['roomname']] = true;
+		}
+	  }
     }
+	for(var k in rooms)
+	  $(".chatRooms").append("<a href='#'>"+k+ "/" + " </a>");
+
   }
+
 };
-app.fetch();
+
+//app.init();
 
 //var orig = $('#chats').html('<blink>OMG IT\'s 1998!</blink>');
 //app.clearMessages();
