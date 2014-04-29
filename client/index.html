@@ -14,14 +14,20 @@
   </head>
   <body>
     <div id="main">
-      <h1>chatterbox</h1>
+    <h1>chatterbox</h1>
+    <div class="chatRooms">
+      <button id="addRoom">Create New Room</button>
+      <input type="text" size="30" class="room">
+      <br>
+      <label>Chat Rooms:</label>
+    </div>
       <!-- Your HTML goes here! -->
-      <div class="wrapper">
-        <ul class="messages"></ul>
+      <div class="chat">
+        <ul id="chats"></ul>
       </div>
       <div class="sender">
         <input type="text" size="60" class="input">
-        <button class="button">Send</button>
+        <button id="sendMessage">Send</button>
       </div>
     </div>
   </body>
