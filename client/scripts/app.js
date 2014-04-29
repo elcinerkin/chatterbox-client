@@ -24,6 +24,12 @@ $(document).ready(function(){
   	app.fetch(room);
   });
 
+  $(document).on("click", "span", function(e){
+  	var friend = $(this).text();
+  	console.log("friend clicked", friend);
+  	friends.push(friend);
+  });
+
 });
 
 var app = {
