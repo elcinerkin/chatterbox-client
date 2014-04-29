@@ -1,6 +1,9 @@
 // YOUR CODE HERE:
 $(document).ready(function(){
-  //setInterval(function(){fetcher(displayer);},3000);
+  // setInterval(function(){
+  // 	//app.wipe();
+  // 	app.fetch();
+  // },3000);
   $(".button").on("click", function(){
   	app.send();
   });
@@ -21,6 +24,8 @@ var app = {
 		'text': text,
 		'roomname': '4chan'
 	};
+	// either show and send at the same time
+	// or call fetch after send
 	//console.log(message);
 	$.ajax({
 	  url: 'https://api.parse.com/1/classes/chatterbox',
@@ -45,30 +50,32 @@ var app = {
 	  data: {},
 	  contentType: 'application/json',
 	  success: function (data) {
-	    console.log('chatterbox: Message received'+ data);
+	    console.log('chatterbox: Message received', data);
+		display(data);
 	  },
 	  error: function (data) {
 	    console.error('chatterbox: Failed to get message');
 	  }
-	}).done(function(data) {
-		display(data);
 	});
   },
 
+  //create a list of current messages with a unique identifier
+  // when a new msg arrives append that to the old ones
   display:function(data){
-	for(var key in data) {
-      for(var i=0; i< data[key].length; i++) {
-		var obj = data[key];
-		for(var j=0; j<obj.length; j++) {
-	      for(var k in obj[j]) {
-			$(".messages").append("<li>" + obj[j]['username'] + " : " + obj[j]['text'] + " Created At: " + obj[j]['createdAt'] + "</li>");
-		  }
-		}
-	  }
-	}
+	//wipe
+	//create a span and put the username there, hence check for xss attacks
+	//
+	var obj = data['results'];
+	for(var j=0; j<obj.length; j++) {
+		$("#chats").append("<li>" + obj[j]['username'] + " : " + obj[j]['text'] + " Created At: " + obj[j]['createdAt'] + "</li>");
+    }
   }
 };
 app.fetch();
+
+//var orig = $('#chats').html('<blink>OMG IT\'s 1998!</blink>');
+//app.clearMessages();
+//expect($('#chats').children().length).to.equal(0);
 
 // to go from an object to html we render it to a string
 // generate html string from the object
